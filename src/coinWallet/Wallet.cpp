@@ -938,6 +938,12 @@ inline bool ThreadSafeAskFee(int64_t nFeeRequired, const std::string& strCaption
 
 string Wallet::SendMoney(Script scriptPubKey, int64_t nValue, CWalletTx& wtxNew, bool fAskFee)
 {
+    // Check amount
+    if (nValue <= 0)
+        return "Invalid amount";
+    if (nValue + nTransactionFee > GetBalance())
+        return "Insufficient funds";
+
     CReserveKey reservekey(this);
     int64_t nFeeRequired;
 
@@ -971,12 +977,6 @@ string Wallet::SendMoney(Script scriptPubKey, int64_t nValue, CWalletTx& wtxNew,
 
 string Wallet::SendMoneyToBitcoinAddress(const ChainAddress& address, int64_t nValue, CWalletTx& wtxNew, bool fAskFee)
 {
-    // Check amount
-    if (nValue <= 0)
-        return "Invalid amount";
-    if (nValue + nTransactionFee > GetBalance())
-        return "Insufficient funds";
-
     // Parse bitcoin address
     Script scriptPubKey;
     scriptPubKey.setAddress(address.getPubKeyHash());
